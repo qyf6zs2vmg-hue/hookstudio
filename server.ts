@@ -52,18 +52,42 @@ async function startServer() {
     }
   });
 
+  console.log(`Starting server in ${process.env.NODE_ENV || 'development'} mode`);
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { 
+        middlewareMode: true,
+        hmr: {
+          port: 3000
+        }
+      },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    
+    // Explicitly serve static files with correct MIME types
+    app.use(express.static(distPath, { 
+      index: false,
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.js')) {
+          res.setHeader('Content-Type', 'application/javascript');
+        } else if (filePath.endsWith('.css')) {
+          res.setHeader('Content-Type', 'text/css');
+        }
+      }
+    }));
+
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      // Only serve index.html for non-file requests (SPA routing)
+      if (req.path.includes('.') && !req.path.endsWith('.html')) {
+        res.status(404).send('Not found');
+      } else {
+        res.sendFile(path.join(distPath, 'index.html'));
+      }
     });
   }
 
