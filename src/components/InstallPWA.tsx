@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useSettings } from '../context/SettingsContext';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { useSettings } from '@/context/SettingsContext';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { X, Download, Monitor } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 

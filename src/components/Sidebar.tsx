@@ -1,9 +1,9 @@
-import { HistoryItem } from '../lib/types';
-import { ScrollArea } from './ui/scroll-area';
-import { Button } from './ui/button';
+import { HistoryItem } from '@/lib/types';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import { Plus, Trash2, Settings, Zap, Wand2, Search, HelpCircle } from 'lucide-react';
-import { cn } from '../lib/utils';
-import { useSettings } from '../context/SettingsContext';
+import { cn } from '@/lib/utils';
+import { useSettings } from '@/context/SettingsContext';
 
 interface SidebarProps {
   history: HistoryItem[];

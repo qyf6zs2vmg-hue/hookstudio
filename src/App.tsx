@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Sidebar } from './components/Sidebar';
-import { MainPanel } from './components/MainPanel';
-import { OutputDisplay } from './components/OutputDisplay';
-import { ChatAssistant } from './components/ChatAssistant';
-import { SettingsModal } from './components/SettingsModal';
-import { HelpModal } from './components/HelpModal';
-import { InstallPWA } from './components/InstallPWA';
-import { ViralMode, GenerationResult, ContentPack, ContentTone, ToolType } from './lib/types';
-import { generateContent } from './services/aiService';
-import { useHistory } from './hooks/useHistory';
-import { Toaster } from './components/ui/sonner';
-import { SettingsProvider, useSettings } from './context/SettingsContext';
+import { Sidebar } from '@/components/Sidebar';
+import { MainPanel } from '@/components/MainPanel';
+import { OutputDisplay } from '@/components/OutputDisplay';
+import { ChatAssistant } from '@/components/ChatAssistant';
+import { SettingsModal } from '@/components/SettingsModal';
+import { HelpModal } from '@/components/HelpModal';
+import { InstallPWA } from '@/components/InstallPWA';
+import { ViralMode, GenerationResult, ContentPack, ContentTone, ToolType } from '@/lib/types';
+import { generateContent } from '@/services/aiService';
+import { useHistory } from '@/hooks/useHistory';
+import { Toaster } from '@/components/ui/sonner';
+import { SettingsProvider, useSettings } from '@/context/SettingsContext';
 import { Menu, X } from 'lucide-react';
-import { Button } from './components/ui/button';
-import { cn } from './lib/utils';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 function AppContent() {
