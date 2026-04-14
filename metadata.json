@@ -1,0 +1,6 @@
+{
+  "name": "Hook Studio AI",
+  "description": "Viral content generator for creators. Generate hooks, captions, and titles for TikTok, Instagram, and YouTube Shorts using AI.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["AI Content Generation", "Voice-to-Text", "History Tracking", "AI Chat Assistant"]
+}
