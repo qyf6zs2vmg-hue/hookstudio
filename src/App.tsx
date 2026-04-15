@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Sidebar } from '@/components/Sidebar';
 import { MainPanel } from '@/components/MainPanel';
 import { OutputDisplay } from '@/components/OutputDisplay';
@@ -303,6 +304,7 @@ export default function App() {
     <ErrorBoundary>
       <SettingsProvider>
         <AppContent />
+        <Analytics />
       </SettingsProvider>
     </ErrorBoundary>
   );
