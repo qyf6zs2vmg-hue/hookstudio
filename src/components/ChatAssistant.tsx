@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { ScrollArea } from './ui/scroll-area';
-import { Input } from './ui/input';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
-import { cn } from '../lib/utils';
-import { sendMessage, ChatMessage } from '../services/chatService';
+import { cn } from '@/lib/utils';
+import { sendMessage, ChatMessage } from '@/services/chatService';
 import { motion, AnimatePresence } from 'motion/react';
 
 export function ChatAssistant() {
@@ -30,7 +30,7 @@ export function ChatAssistant() {
     setIsLoading(true);
 
     const response = await sendMessage(userMsg, messages);
-    setMessages(prev => [...prev, { role: 'model', text: response }]);
+    setMessages(prev => [...prev, { role: 'assistant', text: response }]);
     setIsLoading(false);
   };
 

@@ -6,7 +6,7 @@ export const handler: Handler = async (event) => {
   }
 
   try {
-    const { prompt } = JSON.parse(event.body || "{}");
+    const { messages } = JSON.parse(event.body || "{}");
     const apiKey = process.env.OPENROUTER_API_KEY;
 
     if (!apiKey || apiKey === "MY_OPENROUTER_API_KEY") {
@@ -26,10 +26,7 @@ export const handler: Handler = async (event) => {
       },
       body: JSON.stringify({
         "model": "deepseek/deepseek-chat",
-        "messages": [
-          { "role": "user", "content": prompt }
-        ],
-        "response_format": { "type": "json_object" }
+        "messages": messages
       })
     });
 
@@ -47,7 +44,7 @@ export const handler: Handler = async (event) => {
       body: JSON.stringify(data),
     };
   } catch (error) {
-    console.error("Function error:", error);
+    console.error("Netlify Chat Function error:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Internal Server Error" }),

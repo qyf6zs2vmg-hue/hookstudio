@@ -1,6 +1,6 @@
-import { useSettings } from '../context/SettingsContext';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { useSettings } from '@/context/SettingsContext';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { X, HelpCircle, Zap, Wand2, Search, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 

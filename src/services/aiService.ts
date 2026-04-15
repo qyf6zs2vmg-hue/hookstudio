@@ -92,7 +92,18 @@ Return exactly in this JSON format:
     if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
 
     const data = await response.json();
-    const content = JSON.parse(data.choices[0].message.content);
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error("Invalid response format from AI API");
+    }
+
+    let content;
+    try {
+      content = JSON.parse(data.choices[0].message.content);
+    } catch (e) {
+      console.error("Failed to parse AI response as JSON:", e);
+      throw new Error("AI response was not valid JSON");
+    }
 
     return {
       id: crypto.randomUUID(),
@@ -102,9 +113,9 @@ Return exactly in this JSON format:
       pack,
       tone,
       tool,
-      hooks: content.hooks || [],
-      captions: content.captions || [],
-      titles: content.titles || [],
+      hooks: Array.isArray(content.hooks) ? content.hooks : [],
+      captions: Array.isArray(content.captions) ? content.captions : [],
+      titles: Array.isArray(content.titles) ? content.titles : [],
       analysis: content.analysis,
       improvement: content.improvement
     };

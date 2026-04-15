@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
-import { Label } from './ui/label';
-import { ViralMode, ContentPack, ContentTone, ToolType } from '../lib/types';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { ViralMode, ContentPack, ContentTone, ToolType } from '@/lib/types';
 import { Mic, MicOff, Image as ImageIcon, Loader2, Wand2, Search, Zap } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '@/context/SettingsContext';
 
 interface MainPanelProps {
   onGenerate: (input: string, mode: ViralMode, pack: ContentPack, tone: ContentTone, tool: ToolType) => Promise<void>;

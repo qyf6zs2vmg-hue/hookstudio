@@ -1,7 +1,3 @@
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 const SYSTEM_INSTRUCTION = `You are a helpful AI assistant inside Hook Studio AI, a viral content generator for creators.
 Your goal is to help users refine their content ideas, brainstorm new topics, and improve their hooks.
 
@@ -21,32 +17,35 @@ You MUST ALWAYS respond in the SAME language as the user input.
 - Be concise and focus on providing value for content creation.`;
 
 export interface ChatMessage {
-  role: 'user' | 'model';
+  role: 'user' | 'assistant';
   text: string;
 }
 
 export async function sendMessage(message: string, history: ChatMessage[]) {
   try {
-    const contents = history.map(msg => ({
-      role: msg.role,
-      parts: [{ text: msg.text }]
-    }));
+    const messages = [
+      { role: 'system', content: SYSTEM_INSTRUCTION },
+      ...history.map(msg => ({
+        role: msg.role,
+        content: msg.text
+      })),
+      { role: 'user', content: message }
+    ];
 
-    // Add the current message
-    contents.push({
-      role: 'user',
-      parts: [{ text: message }]
-    });
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
       },
+      body: JSON.stringify({ messages })
     });
 
-    return response.text || "I'm sorry, I couldn't generate a response.";
+    if (!response.ok) {
+      throw new Error(`Chat API Error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content || "I'm sorry, I couldn't generate a response.";
   } catch (error) {
     console.error("Chat error:", error);
     return "I'm having trouble connecting right now. Please try again later.";

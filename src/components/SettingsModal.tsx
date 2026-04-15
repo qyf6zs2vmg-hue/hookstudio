@@ -1,9 +1,9 @@
-import { useSettings } from '../context/SettingsContext';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { useSettings } from '@/context/SettingsContext';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { X, Globe, Moon, Sun, Monitor } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
 
 interface SettingsModalProps {
   isOpen: boolean;

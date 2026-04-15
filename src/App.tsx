@@ -11,6 +11,7 @@ import { generateContent } from '@/services/aiService';
 import { useHistory } from '@/hooks/useHistory';
 import { Toaster } from '@/components/ui/sonner';
 import { SettingsProvider, useSettings } from '@/context/SettingsContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -156,9 +157,11 @@ function AppContent() {
 
 export default function App() {
   return (
-    <SettingsProvider>
-      <AppContent />
-    </SettingsProvider>
+    <ErrorBoundary>
+      <SettingsProvider>
+        <AppContent />
+      </SettingsProvider>
+    </ErrorBoundary>
   );
 }
 

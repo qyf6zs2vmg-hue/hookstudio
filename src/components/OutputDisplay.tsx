@@ -1,13 +1,13 @@
-import { GenerationResult } from '../lib/types';
-import { Card } from './ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Button } from './ui/button';
+import { GenerationResult } from '@/lib/types';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { Share2, Download, Star, AlertCircle, ArrowRight, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
-import { cn } from '../lib/utils';
-import { useSettings } from '../context/SettingsContext';
+import { cn } from '@/lib/utils';
+import { useSettings } from '@/context/SettingsContext';
 
 interface OutputDisplayProps {
   result: GenerationResult;
