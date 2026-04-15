@@ -1,34 +1,5 @@
 import { ViralMode, GenerationResult, ContentPack, ContentTone, ToolType } from '../lib/types';
 
-const FALLBACK_TEMPLATES = {
-  hooks: [
-    "I tried {idea} so you don't have to...",
-    "Stop doing {idea} the wrong way!",
-    "The secret to {idea} that nobody tells you.",
-    "Why {idea} is actually a waste of time.",
-    "How I mastered {idea} in just 24 hours.",
-    "This one trick for {idea} changed everything.",
-    "You won't believe what happened when I did {idea}.",
-    "The truth about {idea} revealed.",
-    "5 mistakes you're making with {idea}.",
-    "Is {idea} actually worth it?"
-  ],
-  captions: [
-    "Save this for later! 📌 #viral #contentcreator",
-    "Which one was your favorite? Let me know below! 👇",
-    "The results speak for themselves. 🚀",
-    "Tag a friend who needs to see this! 🏷️",
-    "Follow for more tips on {idea}! ✨"
-  ],
-  titles: [
-    "The {idea} Secret",
-    "Mastering {idea}",
-    "Why {idea} Matters",
-    "Ultimate {idea} Guide",
-    "The Truth About {idea}"
-  ]
-};
-
 function detectLanguage(text: string): 'Russian' | 'Uzbek' | 'English' {
   const cyrillicPattern = /[\u0400-\u04FF]/;
   const uzbekLatinPattern = /[o'|g'|sh|ch|q|h]/i; // Common Uzbek Latin markers
@@ -120,14 +91,16 @@ FORMAT: Return ONLY a JSON object:
       })
     });
 
+    console.log("API STATUS:", response.status);
+
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("API REQUEST FAILED:", errorData);
+      console.error("OPENROUTER ERROR:", errorData);
       throw new Error(`API Error: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
-    console.log("RAW AI RESPONSE DATA:", data);
+    console.log("API RESPONSE:", data);
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       console.error("INVALID RESPONSE STRUCTURE:", data);
@@ -160,46 +133,7 @@ FORMAT: Return ONLY a JSON object:
       improvement: content.improvement
     };
   } catch (error) {
-    console.error("AI Generation failed, using fallback:", error);
-    // Fallback logic for generator tool
-    if (tool === 'generator') {
-      return {
-        id: crypto.randomUUID(),
-        timestamp: Date.now(),
-        idea: input,
-        mode,
-        pack,
-        tone,
-        tool,
-        hooks: FALLBACK_TEMPLATES.hooks.map(h => h.replace("{idea}", input)),
-        captions: FALLBACK_TEMPLATES.captions.map(c => c.replace("{idea}", input)),
-        titles: FALLBACK_TEMPLATES.titles.map(t => t.replace("{idea}", input))
-      };
-    }
-    
-    // Generic fallback for other tools
-    return {
-      id: crypto.randomUUID(),
-      timestamp: Date.now(),
-      idea: input,
-      mode,
-      pack,
-      tone,
-      tool,
-      hooks: [],
-      captions: [],
-      titles: [],
-      analysis: tool === 'analyzer' ? {
-        score: 5,
-        potential: "Moderate engagement potential. (Fallback Mode)",
-        problems: ["Could be more specific", "Lacks strong hook"],
-        improved: `How to master ${input} in 3 simple steps`
-      } : undefined,
-      improvement: tool === 'improver' ? {
-        improved: `The secret to ${input} revealed`,
-        variations: [`Why ${input} is changing everything`, `Stop doing ${input} wrong`],
-        explanation: "Added curiosity and urgency. (Fallback Mode)"
-      } : undefined
-    };
+    console.error("AI Generation failed:", error);
+    throw error; // Re-throw to be handled by UI (no fallback)
   }
 }
