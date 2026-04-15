@@ -1,9 +1,9 @@
-import { GenerationResult } from '@/lib/types';
+import { GenerationResult, ABHook, ViralAnalytics } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Share2, Download, Star, AlertCircle, ArrowRight, CheckCircle2, ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { Share2, Download, Star, AlertCircle, ArrowRight, CheckCircle2, ArrowLeft, Copy, BarChart3, Zap, Sparkles, RefreshCcw, Wand2, TrendingUp, Users, Clock } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -12,11 +12,21 @@ import { useSettings } from '@/context/SettingsContext';
 interface OutputDisplayProps {
   result: GenerationResult;
   onBack: () => void;
+  onRegenerate?: (idea: string) => void;
 }
 
-export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
+export function OutputDisplay({ result, onBack, onRegenerate }: OutputDisplayProps) {
   const { t } = useSettings();
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Scroll to top when a new result is displayed
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (containerRef.current) {
+      containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [result.id]);
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -49,9 +59,10 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
 
   return (
     <motion.div 
+      ref={containerRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full space-y-6"
+      className="w-full space-y-6 pb-20"
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
@@ -70,6 +81,78 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
             </p>
           </div>
         </div>
+
+        {/* Viral Analytics Card */}
+        {result.analytics && (
+          <Card className="bg-bg-card border border-border-custom p-6 rounded-[2rem] shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+              <TrendingUp className="w-24 h-24" />
+            </div>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-8 h-8 rounded-lg bg-accent-custom/20 flex items-center justify-center text-accent-custom">
+                <BarChart3 className="w-4 h-4" />
+              </div>
+              <h3 className="text-sm font-black uppercase tracking-widest text-text-primary">
+                {t.viralAnalytics}
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">{t.hookStrength}</p>
+                <div className="flex items-end gap-1">
+                  <span className="text-2xl font-black text-text-primary leading-none">{result.analytics.hookStrength}</span>
+                  <span className="text-[10px] font-bold text-text-muted mb-1">/100</span>
+                </div>
+                <div className="w-full h-1 bg-bg-deep rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${result.analytics.hookStrength}%` }}
+                    className="h-full bg-accent-custom"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">{t.viralityScore}</p>
+                <div className="flex items-end gap-1">
+                  <span className="text-2xl font-black text-text-primary leading-none">{result.analytics.viralityScore}</span>
+                  <span className="text-[10px] font-bold text-text-muted mb-1">%</span>
+                </div>
+                <div className="w-full h-1 bg-bg-deep rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${result.analytics.viralityScore}%` }}
+                    className="h-full bg-purple-500"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">{t.engagementPotential}</p>
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider",
+                    result.analytics.engagementPotential === 'High' ? "bg-green-500/20 text-green-500" :
+                    result.analytics.engagementPotential === 'Medium' ? "bg-yellow-500/20 text-yellow-500" :
+                    "bg-red-500/20 text-red-500"
+                  )}>
+                    {t[result.analytics.engagementPotential.toLowerCase() as keyof typeof t] || result.analytics.engagementPotential}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">{t.retentionPrediction}</p>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-accent-custom" />
+                  <span className="text-xs font-bold text-text-primary">{result.analytics.retentionPrediction}</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="flex-1 h-9 bg-bg-deep border-border-custom text-[10px] font-bold uppercase tracking-wider" onClick={downloadResults}>
             <Download className="w-3.5 h-3.5 mr-2" />
@@ -83,65 +166,156 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
       </div>
 
       {result.tool === 'generator' && (
-        <Tabs defaultValue="hooks" className="w-full">
-          <TabsList className="flex bg-bg-deep border border-border-custom p-1 h-10 rounded-xl w-full">
-            <TabsTrigger value="hooks" className="flex-1 data-[state=active]:bg-bg-card data-[state=active]:text-text-primary rounded-lg text-[10px] font-black uppercase tracking-wider transition-all">
+        <Tabs defaultValue={result.isABMode ? "ab-hooks" : "hooks"} className="w-full">
+          <TabsList className="flex bg-bg-deep border border-border-custom p-1 h-12 rounded-2xl w-full">
+            {result.isABMode && (
+              <TabsTrigger 
+                value="ab-hooks" 
+                className="flex-1 data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
+              >
+                A/B Hooks
+              </TabsTrigger>
+            )}
+            <TabsTrigger 
+              value="hooks" 
+              className="flex-1 data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
+            >
               {t.hooks}
             </TabsTrigger>
-            <TabsTrigger value="captions" className="flex-1 data-[state=active]:bg-bg-card data-[state=active]:text-text-primary rounded-lg text-[10px] font-black uppercase tracking-wider transition-all">
+            <TabsTrigger 
+              value="captions" 
+              className="flex-1 data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
+            >
               {t.captions}
             </TabsTrigger>
-            <TabsTrigger value="titles" className="flex-1 data-[state=active]:bg-bg-card data-[state=active]:text-text-primary rounded-lg text-[10px] font-black uppercase tracking-wider transition-all">
+            <TabsTrigger 
+              value="titles" 
+              className="flex-1 data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
+            >
               {t.titles}
             </TabsTrigger>
           </TabsList>
 
-          <AnimatePresence mode="wait">
-            <TabsContent value="hooks" className="mt-4">
-              <div className="space-y-3">
-                {result.hooks.map((hook, i) => (
-                  <ResultCard 
-                    key={`hook-${i}`} 
-                    text={hook} 
-                    index={i + 1} 
-                    type="hook"
-                    onCopy={() => copyToClipboard(hook, `hook-${i}`)}
-                    isCopied={copiedIndex === `hook-${i}`}
-                  />
-                ))}
-              </div>
-            </TabsContent>
+          {result.isABMode && result.abHooks && (
+            <TabsContent value="ab-hooks" className="mt-6 focus-visible:outline-none space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                {result.abHooks.map((hook, i) => (
+                  <Card key={i} className={cn(
+                    "bg-bg-card border-border-custom p-6 rounded-[2rem] relative overflow-hidden transition-all hover:border-accent-custom/50",
+                    i < 3 && "border-l-4 border-l-accent-custom shadow-lg shadow-accent-custom/5"
+                  )}>
+                    {i < 3 && (
+                      <div className="absolute top-4 right-4 px-3 py-1 bg-accent-custom text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
+                        TOP {i + 1}
+                      </div>
+                    )}
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-bg-deep flex items-center justify-center text-accent-custom font-black text-xs">
+                          {i + 1}
+                        </div>
+                        <p className="text-lg font-bold text-text-primary leading-tight pr-12">
+                          {hook.text}
+                        </p>
+                      </div>
 
-            <TabsContent value="captions" className="mt-4">
-              <div className="space-y-3">
-                {result.captions.map((caption, i) => (
-                  <ResultCard 
-                    key={`caption-${i}`} 
-                    text={caption} 
-                    index={i + 1} 
-                    type="caption"
-                    onCopy={() => copyToClipboard(caption, `caption-${i}`)}
-                    isCopied={copiedIndex === `caption-${i}`}
-                  />
-                ))}
-              </div>
-            </TabsContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-border-custom">
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-black text-accent-custom uppercase tracking-widest flex items-center gap-2">
+                            <Sparkles className="w-3 h-3" />
+                            {t.explanation}
+                          </p>
+                          <p className="text-xs text-text-secondary leading-relaxed italic">
+                            {hook.reasoning}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest flex items-center gap-2">
+                            <Zap className="w-3 h-3" />
+                            {t.psychologicalTriggers}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {hook.triggers.map((trigger, j) => (
+                              <span key={j} className="px-2 py-1 bg-purple-500/10 text-purple-500 text-[9px] font-bold uppercase tracking-wider rounded-lg">
+                                {t[trigger as keyof typeof t] || trigger}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
 
-            <TabsContent value="titles" className="mt-4">
-              <div className="space-y-3">
-                {result.titles.map((title, i) => (
-                  <ResultCard 
-                    key={`title-${i}`} 
-                    text={title} 
-                    index={i + 1} 
-                    type="title"
-                    onCopy={() => copyToClipboard(title, `title-${i}`)}
-                    isCopied={copiedIndex === `title-${i}`}
-                  />
+                      <div className="flex gap-2 pt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-9 px-4 rounded-xl text-[10px] font-bold uppercase tracking-widest gap-2"
+                          onClick={() => copyToClipboard(hook.text, `ab-${i}`)}
+                        >
+                          {copiedIndex === `ab-${i}` ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiedIndex === `ab-${i}` ? t.copied : t.copy}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-9 px-4 rounded-xl text-[10px] font-bold uppercase tracking-widest gap-2 text-accent-custom border-accent-custom/20 hover:bg-accent-muted"
+                          onClick={() => onRegenerate?.(hook.text)}
+                        >
+                          <RefreshCcw className="w-3.5 h-3.5" />
+                          Regenerate
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
                 ))}
               </div>
             </TabsContent>
-          </AnimatePresence>
+          )}
+
+          <TabsContent value="hooks" className="mt-6 focus-visible:outline-none">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {result.hooks.map((hook, i) => (
+                <ResultCard 
+                  key={`hook-${i}`} 
+                  text={hook} 
+                  index={i + 1} 
+                  type="hook"
+                  onCopy={() => copyToClipboard(hook, `hook-${i}`)}
+                  isCopied={copiedIndex === `hook-${i}`}
+                />
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="captions" className="mt-6 focus-visible:outline-none">
+            <div className="grid grid-cols-1 gap-4">
+              {result.captions.map((caption, i) => (
+                <ResultCard 
+                  key={`caption-${i}`} 
+                  text={caption} 
+                  index={i + 1} 
+                  type="caption"
+                  onCopy={() => copyToClipboard(caption, `caption-${i}`)}
+                  isCopied={copiedIndex === `caption-${i}`}
+                />
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="titles" className="mt-6 focus-visible:outline-none">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {result.titles.map((title, i) => (
+                <ResultCard 
+                  key={`title-${i}`} 
+                  text={title} 
+                  index={i + 1} 
+                  type="title"
+                  onCopy={() => copyToClipboard(title, `title-${i}`)}
+                  isCopied={copiedIndex === `title-${i}`}
+                />
+              ))}
+            </div>
+          </TabsContent>
         </Tabs>
       )}
 
@@ -216,9 +390,14 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
             <div className="space-y-3">
               {result.improvement.variations.map((v, i) => (
                 <Card key={i} className="bg-bg-card border-border-custom p-4 group relative">
-                  <p className="text-text-primary text-[11px] pr-10 leading-relaxed">{v}</p>
-                  <Button variant="ghost" size="icon" className="absolute right-1 top-1 h-8 w-8 opacity-0 group-hover:opacity-100" onClick={() => copyToClipboard(v, `var-${i}`)}>
-                    <Download className="w-3.5 h-3.5" />
+                  <p className="text-text-primary text-[11px] pr-12 leading-relaxed">{v}</p>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-text-muted hover:text-accent-custom bg-bg-deep border border-border-custom" 
+                    onClick={() => copyToClipboard(v, `var-${i}`)}
+                  >
+                    {copiedIndex === `var-${i}` ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
                   </Button>
                 </Card>
               ))}
@@ -230,7 +409,7 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
   );
 }
 
-function ResultCard({ text, index, onCopy, isCopied, type }: { text: string; index: number; onCopy: () => void; isCopied: boolean; type: 'hook' | 'caption' | 'title'; key?: string }) {
+function ResultCard({ text, index, onCopy, isCopied, type, onImprove, onRegenerate }: { text: string; index: number; onCopy: () => void; isCopied: boolean; type: 'hook' | 'caption' | 'title'; onImprove?: () => void; onRegenerate?: () => void; key?: string }) {
   const { t } = useSettings();
   const getBadge = () => {
     if (type !== 'hook') return null;
@@ -253,25 +432,55 @@ function ResultCard({ text, index, onCopy, isCopied, type }: { text: string; ind
         
         <div className="flex gap-3 flex-1">
           {type === 'hook' && (
-            <span className="text-accent-custom font-black text-xs mt-0.5 shrink-0">
+            <span className="text-accent-custom font-black text-sm mt-0.5 shrink-0">
               {index.toString().padStart(2, '0')}
             </span>
           )}
           <p className={cn(
-            "text-[12px] leading-relaxed",
+            "text-[13px] leading-relaxed pr-8",
             type === 'caption' ? "text-text-secondary italic" : "text-text-primary",
-            type === 'title' ? "font-bold" : "font-medium"
+            type === 'title' ? "font-bold text-base" : "font-medium"
           )}>
             {text}
           </p>
         </div>
 
-        <button
-          className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary transition-colors opacity-0 group-hover:opacity-100 bg-bg-deep px-2 py-1 rounded border border-border-custom"
+        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border-custom opacity-0 group-hover:opacity-100 transition-opacity">
+          {type === 'hook' && (
+            <>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 text-[9px] font-black uppercase tracking-widest text-accent-custom hover:bg-accent-muted gap-2"
+                onClick={onImprove}
+              >
+                <Wand2 className="w-3 h-3" />
+                {t.improveMyHook}
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 text-[9px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary gap-2"
+                onClick={onRegenerate}
+              >
+                <RefreshCcw className="w-3 h-3" />
+                Regenerate
+              </Button>
+            </>
+          )}
+        </div>
+
+        <Button
+          size="icon"
+          variant="ghost"
+          className={cn(
+            "absolute top-2 right-2 h-8 w-8 rounded-lg transition-all border border-border-custom",
+            isCopied ? "bg-accent-custom text-white border-accent-custom" : "bg-bg-deep text-text-muted hover:text-accent-custom"
+          )}
           onClick={onCopy}
         >
-          {isCopied ? t.copied : t.copy}
-        </button>
+          {isCopied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+        </Button>
       </Card>
     </motion.div>
   );

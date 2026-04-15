@@ -1,4 +1,4 @@
-import { ViralMode, GenerationResult, ContentPack, ContentTone, ToolType } from '../lib/types';
+import { ViralMode, GenerationResult, ContentPack, ContentTone, ToolType, AlgorithmMode, ContentGoal } from '../lib/types';
 
 function detectLanguage(text: string): 'Russian' | 'Uzbek' | 'English' {
   const cyrillicPattern = /[\u0400-\u04FF]/;
@@ -22,7 +22,13 @@ export async function generateContent(
   mode: ViralMode, 
   pack: ContentPack, 
   tone: ContentTone, 
-  tool: ToolType
+  tool: ToolType,
+  options?: {
+    algorithm?: AlgorithmMode;
+    targetAudience?: string;
+    goal?: ContentGoal;
+    isABMode?: boolean;
+  }
 ): Promise<GenerationResult> {
   const detectedLang = detectLanguage(input);
 
@@ -31,24 +37,45 @@ You are a senior viral content expert.
 CRITICAL RULE: You MUST respond EXCLUSIVELY in ${detectedLang}.
 - Detected User Language: ${detectedLang}
 - Your Output Language: ${detectedLang}
-- NEVER use English words in ${detectedLang} responses.
 - All JSON values MUST be in ${detectedLang}.
-- Mixing languages is strictly forbidden and will result in a system error.
 
 Context: ${pack} content.
 Tone: ${tone}.
-Viral Intensity: ${mode}.`;
+Viral Intensity: ${mode}.
+${options?.algorithm ? `Algorithm Focus: ${options.algorithm}` : ''}
+${options?.targetAudience ? `Target Audience: ${options.targetAudience}` : ''}
+${options?.goal ? `Content Goal: ${options.goal}` : ''}`;
 
   let userPrompt = "";
 
+  const analyticsFormat = `
+  "analytics": {
+    "hookStrength": 0-100,
+    "viralityScore": 0-100,
+    "engagementPotential": "Low" | "Medium" | "High",
+    "retentionPrediction": "short prediction text"
+  }`;
+
+  const abFormat = options?.isABMode ? `,
+  "abHooks": [
+    {
+      "text": "hook text",
+      "score": 0-100,
+      "reasoning": "psychological trigger explanation",
+      "triggers": ["curiosity", "fear", etc]
+    }
+  ]` : '';
+
   if (tool === 'generator') {
     userPrompt = `TASK: Generate 10 viral hooks, 5 captions, and 5 titles for the idea: "${input}".
+${options?.isABMode ? 'A/B MODE ACTIVE: Generate 5-10 distinct hooks and identify the top 3 strongest ones in abHooks.' : ''}
 LANGUAGE REQUIREMENT: Everything must be in ${detectedLang}.
 FORMAT: Return ONLY a JSON object:
 {
   "hooks": ["..."],
   "captions": ["..."],
-  "titles": ["..."]
+  "titles": ["..."]${abFormat},
+  ${analyticsFormat}
 }`;
   } else if (tool === 'improver') {
     userPrompt = `TASK: Improve this hook: "${input}".
@@ -60,7 +87,8 @@ FORMAT: Return ONLY a JSON object:
     "variations": ["...", "...", "...", "...", "..."],
     "explanation": "..."
   },
-  "hooks": [], "captions": [], "titles": []
+  "hooks": [], "captions": [], "titles": [],
+  ${analyticsFormat}
 }`;
   } else if (tool === 'analyzer') {
     userPrompt = `TASK: Analyze this hook: "${input}".
@@ -73,7 +101,19 @@ FORMAT: Return ONLY a JSON object:
     "problems": ["...", "..."],
     "improved": "..."
   },
-  "hooks": [], "captions": [], "titles": []
+  "hooks": [], "captions": [], "titles": [],
+  ${analyticsFormat}
+}`;
+  } else if (tool === 'remix') {
+    userPrompt = `TASK: Remix this content: "${input}".
+Generate 5 rewritten viral versions and 3 tone variations (funny, aggressive, emotional).
+LANGUAGE REQUIREMENT: Everything must be in ${detectedLang}.
+FORMAT: Return ONLY a JSON object:
+{
+  "hooks": ["version 1", "version 2", "version 3", "version 4", "version 5"],
+  "captions": ["funny version", "aggressive version", "emotional version"],
+  "titles": ["title 1", "title 2", "title 3"],
+  ${analyticsFormat}
 }`;
   }
 
@@ -126,6 +166,12 @@ FORMAT: Return ONLY a JSON object:
       pack,
       tone,
       tool,
+      algorithm: options?.algorithm,
+      targetAudience: options?.targetAudience,
+      goal: options?.goal,
+      isABMode: options?.isABMode,
+      abHooks: content.abHooks,
+      analytics: content.analytics,
       hooks: Array.isArray(content.hooks) ? content.hooks : [],
       captions: Array.isArray(content.captions) ? content.captions : [],
       titles: Array.isArray(content.titles) ? content.titles : [],

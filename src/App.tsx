@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { MainPanel } from '@/components/MainPanel';
 import { OutputDisplay } from '@/components/OutputDisplay';
@@ -6,12 +6,13 @@ import { ChatAssistant } from '@/components/ChatAssistant';
 import { SettingsModal } from '@/components/SettingsModal';
 import { HelpModal } from '@/components/HelpModal';
 import { InstallPWA } from '@/components/InstallPWA';
-import { ViralMode, GenerationResult, ContentPack, ContentTone, ToolType } from '@/lib/types';
+import { ViralMode, GenerationResult, ContentPack, ContentTone, ToolType, AlgorithmMode, ContentGoal } from '@/lib/types';
 import { enqueueRequest, QueueStatus, getSystemStatus } from '@/services/queueService';
 import { useHistory } from '@/hooks/useHistory';
 import { Toaster } from '@/components/ui/sonner';
 import { SettingsProvider, useSettings } from '@/context/SettingsContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { OnboardingModal } from '@/components/OnboardingModal';
 import { Menu, X, Clock, AlertTriangle, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -25,16 +26,35 @@ function AppContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   
   // Queue & Limit State
   const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null);
   const [systemStatus, setSystemStatus] = useState(getSystemStatus());
+
+  const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setSystemStatus(getSystemStatus());
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    // Scroll main content to top when result changes
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [activeResult?.id]);
+
+  useEffect(() => {
+    // Check for first visit
+    const hasVisited = localStorage.getItem('hook_studio_visited');
+    if (!hasVisited) {
+      setIsOnboardingOpen(true);
+      localStorage.setItem('hook_studio_visited', 'true');
+    }
   }, []);
 
   const formatTime = (ms: number) => {
@@ -44,14 +64,26 @@ function AppContent() {
     return `${hours}h ${mins}m ${secs}s`;
   };
 
-  const handleGenerate = async (input: string, mode: ViralMode, pack: ContentPack, tone: ContentTone, tool: ToolType) => {
+  const handleGenerate = async (
+    input: string, 
+    mode: ViralMode, 
+    pack: ContentPack, 
+    tone: ContentTone, 
+    tool: ToolType,
+    options?: {
+      algorithm?: AlgorithmMode;
+      targetAudience?: string;
+      goal?: ContentGoal;
+      isABMode?: boolean;
+    }
+  ) => {
     setIsGenerating(true);
     setQueueStatus(null);
     
     try {
       const result = await enqueueRequest(input, mode, pack, tone, tool, (status) => {
         setQueueStatus(status);
-      });
+      }, options);
       
       setActiveResult(result);
       saveToHistory(result);
@@ -87,10 +119,23 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-deep text-text-primary font-sans dark overflow-x-hidden">
-      <div className="max-w-[480px] mx-auto min-h-screen flex flex-col bg-bg-card shadow-2xl relative">
-        {/* Header */}
-        <header className="h-16 border-b border-border-custom flex items-center justify-between px-6 shrink-0 bg-bg-card/80 backdrop-blur-md sticky top-0 z-30">
+    <div className="min-h-screen bg-bg-deep text-text-primary font-sans dark overflow-x-hidden flex flex-col md:flex-row">
+      {/* Desktop Sidebar (Permanent) */}
+      <aside className="hidden md:flex w-[280px] border-r border-border-custom bg-bg-card shrink-0 h-screen sticky top-0">
+        <Sidebar 
+          history={history}
+          activeId={activeResult?.id || null}
+          onSelect={handleSelectHistory}
+          onDelete={deleteFromHistory}
+          onNew={handleNew}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenHelp={() => setIsHelpOpen(true)}
+        />
+      </aside>
+
+      <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden">
+        {/* Header (Mobile Only) */}
+        <header className="md:hidden h-16 border-b border-border-custom flex items-center justify-between px-6 shrink-0 bg-bg-card/80 backdrop-blur-md sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
@@ -117,18 +162,18 @@ function AppContent() {
           </div>
         </header>
 
-        {/* Sidebar Drawer Overlay */}
+        {/* Mobile Sidebar Drawer Overlay */}
         <div 
           className={cn(
-            "fixed inset-0 bg-black/80 z-40 transition-opacity duration-300",
+            "fixed inset-0 bg-black/80 z-40 transition-opacity duration-300 md:hidden",
             isSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
           onClick={() => setIsSidebarOpen(false)}
         />
 
-        {/* Sidebar Drawer */}
+        {/* Mobile Sidebar Drawer */}
         <aside className={cn(
-          "fixed top-0 left-0 bottom-0 w-[280px] bg-bg-deep z-50 transition-transform duration-300 shadow-2xl",
+          "fixed top-0 left-0 bottom-0 w-[280px] bg-bg-deep z-50 transition-transform duration-300 shadow-2xl md:hidden",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <Sidebar 
@@ -143,8 +188,26 @@ function AppContent() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 flex flex-col overflow-y-auto no-scrollbar">
-          <div className="flex-1 flex flex-col p-4">
+        <main 
+          ref={mainRef}
+          className="flex-1 flex flex-col overflow-y-auto no-scrollbar w-full bg-bg-deep"
+        >
+          <div className="flex-1 flex flex-col p-4 md:p-10 max-w-[1400px] mx-auto w-full">
+            {/* Desktop Header (Visible only on desktop) */}
+            <div className="hidden md:flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl font-black tracking-tighter text-text-primary">Hook Studio AI</h1>
+                <p className="text-text-secondary text-sm font-medium mt-1 uppercase tracking-widest">{t.creatorMode}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="sm" className="bg-bg-card border-border-custom" onClick={() => setIsHelpOpen(true)}>
+                  {t.help}
+                </Button>
+                <Button variant="outline" size="sm" className="bg-bg-card border-border-custom" onClick={() => setIsSettingsOpen(true)}>
+                  {t.settings}
+                </Button>
+              </div>
+            </div>
             {/* System Status Banner */}
             <div className="mb-4 space-y-2">
               {(systemStatus.limits.isUserLimited || systemStatus.limits.isGlobalLimited) && (
@@ -193,7 +256,11 @@ function AppContent() {
               </div>
             ) : (
               <div className="flex-1 space-y-6">
-                <OutputDisplay result={activeResult} onBack={() => setActiveResult(null)} />
+                <OutputDisplay 
+                  result={activeResult} 
+                  onBack={() => setActiveResult(null)} 
+                  onRegenerate={(idea) => handleGenerate(idea, activeResult.mode, activeResult.pack, activeResult.tone, 'generator')}
+                />
                 <div className="px-4 pb-12">
                   <Button 
                     variant="ghost" 
@@ -223,6 +290,7 @@ function AppContent() {
         <ChatAssistant />
         <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+        <OnboardingModal isOpen={isOnboardingOpen} onClose={() => setIsOnboardingOpen(false)} />
         <InstallPWA />
         <Toaster position="top-center" theme="dark" />
       </div>

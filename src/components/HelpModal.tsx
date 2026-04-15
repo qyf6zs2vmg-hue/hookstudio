@@ -1,7 +1,7 @@
 import { useSettings } from '@/context/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { X, HelpCircle, Zap, Wand2, Search, Info } from 'lucide-react';
+import { X, HelpCircle, Zap, Wand2, Search, Info, Clock, BarChart3, Layers, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface HelpModalProps {
@@ -97,6 +97,90 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                       <div className="text-text-primary font-bold text-sm">{t.aggressive}</div>
                       <p className="text-xs text-text-secondary leading-relaxed">{t.helpAggressiveDesc}</p>
                     </div>
+                  </div>
+                </div>
+
+                {/* Limits & Queue Section */}
+                <div className="space-y-6">
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-accent-custom flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    {t.helpLimitsTitle}
+                  </h3>
+                  <div className="bg-bg-deep p-6 rounded-xl border border-border-custom space-y-4">
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      {t.helpLimitsDesc}
+                    </p>
+                    <ul className="space-y-3">
+                      <li className="flex items-center gap-3 text-xs text-text-primary font-bold">
+                        <div className="w-1.5 h-1.5 rounded-full bg-accent-custom" />
+                        {t.helpUserLimit}
+                      </li>
+                      <li className="flex items-center gap-3 text-xs text-text-primary font-bold">
+                        <div className="w-1.5 h-1.5 rounded-full bg-accent-custom" />
+                        {t.helpGlobalLimit}
+                      </li>
+                      <li className="flex items-center gap-3 text-xs text-text-primary font-bold">
+                        <div className="w-1.5 h-1.5 rounded-full bg-accent-custom" />
+                        {t.helpResetTime}
+                      </li>
+                    </ul>
+                    <div className="pt-4 border-t border-border-custom">
+                      <p className="text-[11px] text-text-muted italic leading-relaxed">
+                        {t.helpQueueDesc}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Viral Score System */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-accent-custom flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4" />
+                    {t.helpViralScoreTitle}
+                  </h3>
+                  <div className="bg-bg-deep p-6 rounded-xl border border-border-custom">
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      {t.helpViralScoreDesc}
+                    </p>
+                  </div>
+                </div>
+
+                {/* A/B Mode */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-accent-custom flex items-center gap-2">
+                    <Layers className="w-4 h-4" />
+                    {t.helpABModeTitle}
+                  </h3>
+                  <div className="bg-bg-deep p-6 rounded-xl border border-border-custom">
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      {t.helpABModeDesc}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Algorithm Modes */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-accent-custom flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    {t.helpAlgoModeTitle}
+                  </h3>
+                  <div className="bg-bg-deep p-6 rounded-xl border border-border-custom">
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      {t.helpAlgoModeDesc}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Examples */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-accent-custom flex items-center gap-2">
+                    <Search className="w-4 h-4" />
+                    {t.helpExamplesTitle}
+                  </h3>
+                  <div className="bg-bg-deep p-6 rounded-xl border border-border-custom">
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      {t.helpExamplesDesc}
+                    </p>
                   </div>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import { ViralMode, GenerationResult, ContentPack, ContentTone, ToolType } from '../lib/types';
+import { ViralMode, GenerationResult, ContentPack, ContentTone, ToolType, AlgorithmMode, ContentGoal } from '../lib/types';
 import { generateContent } from './aiService';
 
 // --- Types ---
@@ -37,7 +37,7 @@ const GLOBAL_LIMITS_KEY = 'hook_studio_global_limits';
 
 let isProcessing = false;
 const queue: Array<{
-  params: [string, ViralMode, ContentPack, ContentTone, ToolType];
+  params: [string, ViralMode, ContentPack, ContentTone, ToolType, any?];
   resolve: (result: GenerationResult) => void;
   reject: (error: any) => void;
   onStatusUpdate: (status: QueueStatus) => void;
@@ -69,9 +69,10 @@ function setCache(key: string, result: GenerationResult) {
   }
 }
 
-function getRequestKey(input: string, mode: ViralMode, pack: ContentPack, tone: ContentTone, tool: ToolType) {
+function getRequestKey(input: string, mode: ViralMode, pack: ContentPack, tone: ContentTone, tool: ToolType, options?: any) {
   // Use a simple string key instead of btoa to avoid Unicode issues with Russian/Uzbek characters
-  return `key_${input}_${mode}_${pack}_${tone}_${tool}`;
+  const optionsKey = options ? JSON.stringify(options) : '';
+  return `key_${input}_${mode}_${pack}_${tone}_${tool}_${optionsKey}`;
 }
 
 function getUserLimits() {
@@ -125,10 +126,26 @@ function setGlobalLimits(count: number) {
 
 function getResetTimeRemaining() {
   const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-  return tomorrow.getTime() - now.getTime();
+  
+  // Tashkent is UTC+5
+  // We want to find the next 05:00 AM in Tashkent time
+  // 1. Get current time in UTC
+  const utcNow = now.getTime() + (now.getTimezoneOffset() * 60000);
+  // 2. Get current time in Tashkent
+  const tashkentNow = new Date(utcNow + (5 * 3600000));
+  
+  // 3. Create a date for 05:00 AM today in Tashkent
+  const resetTimeToday = new Date(tashkentNow);
+  resetTimeToday.setHours(5, 0, 0, 0);
+  
+  // 4. If 05:00 AM has already passed today, set it to tomorrow
+  if (tashkentNow.getTime() >= resetTimeToday.getTime()) {
+    resetTimeToday.setDate(resetTimeToday.getDate() + 1);
+  }
+  
+  // 5. Calculate difference
+  const diffMs = resetTimeToday.getTime() - tashkentNow.getTime();
+  return diffMs;
 }
 
 // --- Public API ---
@@ -162,10 +179,16 @@ export async function enqueueRequest(
   pack: ContentPack,
   tone: ContentTone,
   tool: ToolType,
-  onStatusUpdate: (status: QueueStatus) => void
+  onStatusUpdate: (status: QueueStatus) => void,
+  options?: {
+    algorithm?: AlgorithmMode;
+    targetAudience?: string;
+    goal?: ContentGoal;
+    isABMode?: boolean;
+  }
 ): Promise<GenerationResult> {
   // 1. Check Cache
-  const key = getRequestKey(input, mode, pack, tone, tool);
+  const key = getRequestKey(input, mode, pack, tone, tool, options);
   const cache = getCache();
   if (cache[key]) {
     console.log("Returning cached result");
@@ -181,7 +204,7 @@ export async function enqueueRequest(
   // 3. Add to Queue
   return new Promise((resolve, reject) => {
     queue.push({
-      params: [input, mode, pack, tone, tool],
+      params: [input, mode, pack, tone, tool, options],
       resolve,
       reject,
       onStatusUpdate
@@ -210,17 +233,17 @@ async function processQueue() {
   updateQueueStatuses();
 
   try {
-    const [input, mode, pack, tone, tool] = item.params;
+    const [input, mode, pack, tone, tool, options] = item.params;
     
     // Final limit check before processing
     const status = getSystemStatus();
     if (status.limits.isUserLimited) throw new Error('USER_LIMIT_REACHED');
     if (status.limits.isGlobalLimited) throw new Error('GLOBAL_LIMIT_REACHED');
 
-    const result = await generateContent(input, mode, pack, tone, tool);
+    const result = await generateContent(input, mode, pack, tone, tool, options);
     
     // Update Cache
-    const key = getRequestKey(input, mode, pack, tone, tool);
+    const key = getRequestKey(input, mode, pack, tone, tool, options);
     setCache(key, result);
 
     // Update Limits
