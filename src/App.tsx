@@ -16,6 +16,7 @@ import { Menu, X, Clock, AlertTriangle, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { Analytics } from '@vercel/analytics/react';
 
 function AppContent() {
   const { t } = useSettings();
@@ -236,7 +237,7 @@ export default function App() {
       <SettingsProvider>
         <AppContent />
       </SettingsProvider>
+      <Analytics />
     </ErrorBoundary>
   );
 }
-
