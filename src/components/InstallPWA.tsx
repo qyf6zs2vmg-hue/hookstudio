@@ -66,22 +66,22 @@ export function InstallPWA() {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] w-[90%] max-w-md"
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[300] w-[90%]"
         >
-          <Card className="bg-bg-card border-accent-custom/30 shadow-2xl p-4 flex items-center gap-4 border-2">
-            <div className="w-12 h-12 rounded-xl bg-accent-muted flex items-center justify-center shrink-0">
-              <Monitor className="w-6 h-6 text-accent-custom" />
+          <Card className="bg-bg-card border-accent-custom/30 shadow-2xl p-3 flex items-center gap-3 border-2 rounded-2xl">
+            <div className="w-10 h-10 rounded-xl bg-accent-muted flex items-center justify-center shrink-0">
+              <Monitor className="w-5 h-5 text-accent-custom" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-bold text-text-primary truncate">{t.pwaTitle}</h4>
-              <p className="text-xs text-text-secondary truncate">{t.pwaDesc}</p>
+              <h4 className="text-xs font-bold text-text-primary truncate">{t.pwaTitle}</h4>
+              <p className="text-[10px] text-text-secondary truncate">{t.pwaDesc}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button size="sm" className="bg-accent-custom hover:bg-accent-custom/90 text-white font-bold text-xs" onClick={handleInstall}>
+            <div className="flex items-center gap-1.5">
+              <Button size="sm" className="h-8 bg-accent-custom hover:bg-accent-custom/90 text-white font-bold text-[10px] px-3" onClick={handleInstall}>
                 {t.pwaInstall}
               </Button>
               <Button size="icon" variant="ghost" className="h-8 w-8 text-text-muted hover:text-text-primary" onClick={handleDismiss}>
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </Button>
             </div>
           </Card>

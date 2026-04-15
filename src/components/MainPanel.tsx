@@ -3,10 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ViralMode, ContentPack, ContentTone, ToolType } from '@/lib/types';
-import { Mic, MicOff, Image as ImageIcon, Loader2, Wand2, Search, Zap } from 'lucide-react';
+import { Mic, MicOff, Image as ImageIcon, Loader2, Wand2, Search, Zap, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useSettings } from '@/context/SettingsContext';
+import { getSystemStatus } from '@/services/queueService';
 
 interface MainPanelProps {
   onGenerate: (input: string, mode: ViralMode, pack: ContentPack, tone: ContentTone, tool: ToolType) => Promise<void>;
@@ -22,6 +23,9 @@ export function MainPanel({ onGenerate, isGenerating }: MainPanelProps) {
   const [tool, setTool] = useState<ToolType>('generator');
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
+  
+  const systemStatus = getSystemStatus();
+  const isLimited = systemStatus.limits.isUserLimited || systemStatus.limits.isGlobalLimited || systemStatus.cooldown.isCoolingDown;
 
   useEffect(() => {
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
@@ -73,61 +77,61 @@ export function MainPanel({ onGenerate, isGenerating }: MainPanelProps) {
   };
 
   return (
-    <div className="max-w-5xl mx-auto w-full space-y-12 py-16 px-6">
-      <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-muted border border-accent-custom/20 text-[10px] font-black uppercase tracking-[0.2em] text-accent-custom mb-2">
+    <div className="w-full space-y-8 py-4 px-2">
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-muted border border-accent-custom/20 text-[9px] font-black uppercase tracking-[0.2em] text-accent-custom mb-1">
           <Zap className="w-3 h-3" />
           Powered by AI
         </div>
-        <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-text-primary">
+        <h1 className="text-4xl font-black tracking-tighter text-text-primary">
           {t.appName}
         </h1>
-        <p className="text-text-secondary text-lg max-w-2xl mx-auto leading-relaxed">
+        <p className="text-text-secondary text-sm max-w-xs mx-auto leading-relaxed">
           {tool === 'generator' ? t.helpGeneratorDesc : tool === 'improver' ? t.helpImproverDesc : t.helpAnalyzerDesc}
         </p>
       </div>
 
       {/* Tool Selector */}
       <div className="flex justify-center">
-        <div className="flex bg-bg-card/50 backdrop-blur-sm border border-border-custom p-1 rounded-2xl shadow-xl max-w-full overflow-x-auto no-scrollbar">
+        <div className="flex bg-bg-deep border border-border-custom p-1 rounded-xl shadow-sm w-full">
           {(['generator', 'improver', 'analyzer'] as const).map((T) => (
             <button
               key={T}
               onClick={() => setTool(T)}
               className={cn(
-                "flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-[11px] sm:text-xs font-black transition-all uppercase tracking-wider whitespace-nowrap",
+                "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-black transition-all uppercase tracking-wider",
                 tool === T 
-                  ? "bg-bg-surface text-text-primary shadow-lg border border-border-custom" 
+                  ? "bg-bg-card text-text-primary shadow-sm border border-border-custom" 
                   : "text-text-muted hover:text-text-primary"
               )}
             >
-              {T === 'generator' && <Zap className="w-3.5 h-3.5 shrink-0" />}
-              {T === 'improver' && <Wand2 className="w-3.5 h-3.5 shrink-0" />}
-              {T === 'analyzer' && <Search className="w-3.5 h-3.5 shrink-0" />}
+              {T === 'generator' && <Zap className="w-3 h-3 shrink-0" />}
+              {T === 'improver' && <Wand2 className="w-3 h-3 shrink-0" />}
+              {T === 'analyzer' && <Search className="w-3 h-3 shrink-0" />}
               <span>{t[T]}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="bg-bg-card border border-border-custom rounded-[2rem] p-10 shadow-2xl space-y-10 relative overflow-hidden">
+      <div className="bg-bg-card border border-border-custom rounded-3xl p-6 shadow-xl space-y-6 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent-custom to-transparent opacity-20" />
         
         {/* Input Area */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-[11px] uppercase tracking-widest font-bold text-text-muted">
+            <Label className="text-[9px] uppercase tracking-widest font-bold text-text-muted">
               {tool === 'generator' ? t.workspace : t[tool]}
             </Label>
-            <div className="flex bg-bg-deep p-1 rounded-lg border border-border-custom">
+            <div className="flex bg-bg-deep p-0.5 rounded-lg border border-border-custom">
               {(['normal', 'viral', 'aggressive'] as const).map((m) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
                   className={cn(
-                    "px-4 py-1.5 rounded-md text-xs font-semibold transition-all capitalize",
+                    "px-3 py-1 rounded-md text-[9px] font-bold transition-all capitalize",
                     mode === m 
-                      ? "bg-bg-surface text-text-primary shadow-sm" 
+                      ? "bg-bg-card text-text-primary shadow-sm" 
                       : "text-text-secondary hover:text-text-primary"
                   )}
                 >
@@ -140,55 +144,50 @@ export function MainPanel({ onGenerate, isGenerating }: MainPanelProps) {
           <div className="relative group">
             <Textarea
               placeholder={tool === 'generator' ? t.ideaPlaceholder : t.weakHookPlaceholder}
-              className="min-h-[160px] bg-bg-deep border-border-custom text-text-primary placeholder:text-text-muted focus:border-accent-custom/50 focus:ring-0 rounded-2xl p-6 text-lg leading-relaxed resize-none transition-all"
+              className="min-h-[140px] bg-bg-deep border-border-custom text-text-primary placeholder:text-text-muted focus:border-accent-custom/50 focus:ring-0 rounded-xl p-4 text-base leading-relaxed resize-none transition-all"
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
-            <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-focus-within:opacity-100 transition-opacity">
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest bg-bg-surface px-2 py-1 rounded border border-border-custom">
-                {input.length} chars
-              </span>
-            </div>
           </div>
         </div>
 
         {/* Selectors Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <Label className="text-[11px] uppercase tracking-widest font-black text-accent-custom">{t.contentPack}</Label>
-            <div className="grid grid-cols-3 gap-2">
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <Label className="text-[9px] uppercase tracking-widest font-black text-accent-custom">{t.contentPack}</Label>
+            <div className="grid grid-cols-3 gap-1.5">
               {(['tiktok', 'reels', 'shorts', 'ad', 'educational'] as const).map((p) => (
                 <button
                   key={p}
                   onClick={() => setPack(p)}
                   className={cn(
-                    "py-2.5 px-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider transition-all whitespace-nowrap overflow-hidden",
+                    "py-2 rounded-lg border text-[8px] font-black uppercase tracking-wider transition-all whitespace-nowrap overflow-hidden",
                     pack === p 
                       ? "bg-accent-muted border-accent-custom/50 text-accent-custom shadow-sm" 
-                      : "bg-bg-deep border-border-custom text-text-muted hover:border-text-muted/50 hover:text-text-secondary"
+                      : "bg-bg-deep border-border-custom text-text-muted hover:text-text-secondary"
                   )}
                 >
-                  <span className="block w-full">{p}</span>
+                  {p}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="space-y-4">
-            <Label className="text-[11px] uppercase tracking-widest font-black text-accent-custom">{t.tone}</Label>
-            <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-3">
+            <Label className="text-[9px] uppercase tracking-widest font-black text-accent-custom">{t.tone}</Label>
+            <div className="grid grid-cols-3 gap-1.5">
               {(['emotional', 'educational', 'storytelling', 'shock', 'humor', 'sales'] as const).map((tn) => (
                 <button
                   key={tn}
                   onClick={() => setTone(tn)}
                   className={cn(
-                    "py-2.5 px-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider transition-all whitespace-nowrap overflow-hidden",
+                    "py-2 rounded-lg border text-[8px] font-black uppercase tracking-wider transition-all whitespace-nowrap overflow-hidden",
                     tone === tn 
                       ? "bg-accent-muted border-accent-custom/50 text-accent-custom shadow-sm" 
-                      : "bg-bg-deep border-border-custom text-text-muted hover:border-border-muted/50 hover:text-text-secondary"
+                      : "bg-bg-deep border-border-custom text-text-muted hover:text-text-secondary"
                   )}
                 >
-                  <span className="block w-full">{t[tn]}</span>
+                  {t[tn]}
                 </button>
               ))}
             </div>
@@ -196,37 +195,43 @@ export function MainPanel({ onGenerate, isGenerating }: MainPanelProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-6 border-t border-border-custom">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                "h-11 px-5 gap-2.5 bg-bg-surface border-border-custom text-text-secondary hover:text-text-primary hover:bg-bg-surface/80 rounded-xl transition-all flex-1 sm:flex-none",
-                isRecording && "text-accent-custom border-accent-custom/50 bg-accent-muted"
-              )}
-              onClick={toggleRecording}
-            >
-              {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              <span className="text-[10px] font-black uppercase tracking-widest">{isRecording ? 'Stop' : t.voice}</span>
-            </Button>
-          </div>
-
+        <div className="flex flex-col gap-3 pt-4 border-t border-border-custom">
           <Button
-            className="h-12 w-full sm:w-auto px-8 text-[11px] font-black bg-accent-custom hover:opacity-90 text-white shadow-[0_8px_20px_rgba(255,78,0,0.25)] rounded-xl transition-all gap-3 uppercase tracking-widest whitespace-nowrap"
+            className={cn(
+              "h-12 w-full text-[11px] font-black shadow-[0_8px_20px_rgba(255,78,0,0.25)] rounded-xl transition-all gap-3 uppercase tracking-widest whitespace-nowrap",
+              isLimited && !isGenerating ? "bg-bg-surface text-text-muted cursor-not-allowed border border-border-custom" : "bg-accent-custom hover:opacity-90 text-white"
+            )}
             onClick={handleSubmit}
-            disabled={isGenerating}
+            disabled={isGenerating || isLimited}
           >
             {isGenerating ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>{t.generating}</span>
               </>
+            ) : isLimited ? (
+              <>
+                <AlertCircle className="w-4 h-4" />
+                <span>{systemStatus.cooldown.isCoolingDown ? t.cooldownActive.replace('{time}', Math.ceil(systemStatus.cooldown.remainingTime / 1000).toString()) : t.upgrade}</span>
+              </>
             ) : (
               <span>
                 {tool === 'generator' ? t.generateBtn : tool === 'improver' ? t.improveBtn : t.analyzeBtn}
               </span>
             )}
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "h-10 w-full gap-2 bg-bg-deep border-border-custom text-text-secondary hover:text-text-primary rounded-xl transition-all",
+              isRecording && "text-accent-custom border-accent-custom/50 bg-accent-muted"
+            )}
+            onClick={toggleRecording}
+          >
+            {isRecording ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+            <span className="text-[9px] font-black uppercase tracking-widest">{isRecording ? 'Stop' : t.voice}</span>
           </Button>
         </div>
       </div>

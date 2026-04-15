@@ -51,32 +51,32 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-6xl mx-auto w-full py-12 px-8 space-y-8"
+      className="w-full space-y-6"
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-text-muted hover:text-text-primary"
+            className="text-text-muted hover:text-text-primary h-8 w-8"
             onClick={onBack}
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </Button>
           <div>
-            <h2 className="text-2xl font-bold text-text-primary tracking-tight">{t.results}</h2>
-            <p className="text-text-secondary text-sm mt-1">
-              {t.workspace}: <span className="text-text-primary font-medium italic">"{result.idea}"</span>
+            <h2 className="text-xl font-bold text-text-primary tracking-tight">{t.results}</h2>
+            <p className="text-text-secondary text-[11px] mt-0.5 max-w-[200px] truncate">
+              {result.idea}
             </p>
           </div>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" size="sm" className="bg-bg-surface border-border-custom text-text-secondary hover:text-text-primary" onClick={downloadResults}>
-            <Download className="w-4 h-4 mr-2" />
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="flex-1 h-9 bg-bg-deep border-border-custom text-[10px] font-bold uppercase tracking-wider" onClick={downloadResults}>
+            <Download className="w-3.5 h-3.5 mr-2" />
             {t.export}
           </Button>
-          <Button variant="outline" size="sm" className="bg-bg-surface border-border-custom text-text-secondary hover:text-text-primary" onClick={() => toast.info(t.sharingSoon)}>
-            <Share2 className="w-4 h-4 mr-2" />
+          <Button variant="outline" size="sm" className="flex-1 h-9 bg-bg-deep border-border-custom text-[10px] font-bold uppercase tracking-wider" onClick={() => toast.info(t.sharingSoon)}>
+            <Share2 className="w-3.5 h-3.5 mr-2" />
             {t.share}
           </Button>
         </div>
@@ -84,21 +84,21 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
 
       {result.tool === 'generator' && (
         <Tabs defaultValue="hooks" className="w-full">
-          <TabsList className="flex bg-bg-deep border border-border-custom p-1 h-12 rounded-xl w-fit">
-            <TabsTrigger value="hooks" className="px-6 data-[state=active]:bg-bg-surface data-[state=active]:text-text-primary rounded-lg text-text-secondary font-semibold transition-all">
+          <TabsList className="flex bg-bg-deep border border-border-custom p-1 h-10 rounded-xl w-full">
+            <TabsTrigger value="hooks" className="flex-1 data-[state=active]:bg-bg-card data-[state=active]:text-text-primary rounded-lg text-[10px] font-black uppercase tracking-wider transition-all">
               {t.hooks}
             </TabsTrigger>
-            <TabsTrigger value="captions" className="px-6 data-[state=active]:bg-bg-surface data-[state=active]:text-text-primary rounded-lg text-text-secondary font-semibold transition-all">
+            <TabsTrigger value="captions" className="flex-1 data-[state=active]:bg-bg-card data-[state=active]:text-text-primary rounded-lg text-[10px] font-black uppercase tracking-wider transition-all">
               {t.captions}
             </TabsTrigger>
-            <TabsTrigger value="titles" className="px-6 data-[state=active]:bg-bg-surface data-[state=active]:text-text-primary rounded-lg text-text-secondary font-semibold transition-all">
+            <TabsTrigger value="titles" className="flex-1 data-[state=active]:bg-bg-card data-[state=active]:text-text-primary rounded-lg text-[10px] font-black uppercase tracking-wider transition-all">
               {t.titles}
             </TabsTrigger>
           </TabsList>
 
           <AnimatePresence mode="wait">
-            <TabsContent value="hooks" className="mt-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <TabsContent value="hooks" className="mt-4">
+              <div className="space-y-3">
                 {result.hooks.map((hook, i) => (
                   <ResultCard 
                     key={`hook-${i}`} 
@@ -112,8 +112,8 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="captions" className="mt-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <TabsContent value="captions" className="mt-4">
+              <div className="space-y-3">
                 {result.captions.map((caption, i) => (
                   <ResultCard 
                     key={`caption-${i}`} 
@@ -127,8 +127,8 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="titles" className="mt-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <TabsContent value="titles" className="mt-4">
+              <div className="space-y-3">
                 {result.titles.map((title, i) => (
                   <ResultCard 
                     key={`title-${i}`} 
@@ -146,45 +146,45 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
       )}
 
       {result.tool === 'analyzer' && result.analysis && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Card className="lg:col-span-1 bg-bg-card border-border-custom p-8 flex flex-col items-center justify-center text-center space-y-4">
-            <div className="relative w-32 h-32 flex items-center justify-center">
+        <div className="space-y-4">
+          <Card className="bg-bg-card border-border-custom p-6 flex flex-col items-center justify-center text-center space-y-3">
+            <div className="relative w-24 h-24 flex items-center justify-center">
               <svg className="w-full h-full -rotate-90">
-                <circle cx="64" cy="64" r="58" fill="none" stroke="currentColor" strokeWidth="8" className="text-bg-surface" />
-                <circle cx="64" cy="64" r="58" fill="none" stroke="currentColor" strokeWidth="8" strokeDasharray={364} strokeDashoffset={364 - (364 * result.analysis.score) / 10} className="text-accent-custom transition-all duration-1000" />
+                <circle cx="48" cy="48" r="44" fill="none" stroke="currentColor" strokeWidth="6" className="text-bg-deep" />
+                <circle cx="48" cy="48" r="44" fill="none" stroke="currentColor" strokeWidth="6" strokeDasharray={276} strokeDashoffset={276 - (276 * result.analysis.score) / 10} className="text-accent-custom transition-all duration-1000" />
               </svg>
-              <span className="absolute text-4xl font-black text-text-primary">{result.analysis.score}</span>
+              <span className="absolute text-3xl font-black text-text-primary">{result.analysis.score}</span>
             </div>
-            <h3 className="text-lg font-bold text-text-primary">{t.score}</h3>
-            <p className="text-text-secondary text-sm">{result.analysis.potential}</p>
+            <h3 className="text-sm font-bold text-text-primary uppercase tracking-widest">{t.score}</h3>
+            <p className="text-text-secondary text-[11px] leading-relaxed">{result.analysis.potential}</p>
           </Card>
 
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="bg-bg-card border-border-custom p-6 space-y-4">
-              <div className="flex items-center gap-2 text-accent-custom font-bold text-sm uppercase tracking-widest">
-                <AlertCircle className="w-4 h-4" />
+          <div className="space-y-4">
+            <Card className="bg-bg-card border-border-custom p-5 space-y-3">
+              <div className="flex items-center gap-2 text-accent-custom font-bold text-[10px] uppercase tracking-widest">
+                <AlertCircle className="w-3.5 h-3.5" />
                 {t.problems}
               </div>
-              <ul className="space-y-3">
+              <ul className="space-y-2">
                 {result.analysis.problems.map((p, i) => (
-                  <li key={i} className="flex items-start gap-3 text-text-secondary text-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-text-muted mt-1.5 shrink-0" />
+                  <li key={i} className="flex items-start gap-2 text-text-secondary text-[11px]">
+                    <span className="w-1 h-1 rounded-full bg-text-muted mt-1.5 shrink-0" />
                     {p}
                   </li>
                 ))}
               </ul>
             </Card>
 
-            <Card className="bg-bg-card border-border-custom p-6 space-y-4 border-l-4 border-l-accent-custom">
-              <div className="flex items-center gap-2 text-text-primary font-bold text-sm uppercase tracking-widest">
-                <CheckCircle2 className="w-4 h-4 text-accent-custom" />
+            <Card className="bg-bg-card border-border-custom p-5 space-y-3 border-l-4 border-l-accent-custom">
+              <div className="flex items-center gap-2 text-text-primary font-bold text-[10px] uppercase tracking-widest">
+                <CheckCircle2 className="w-3.5 h-3.5 text-accent-custom" />
                 {t.improvedVersion}
               </div>
-              <p className="text-text-primary text-lg font-medium leading-relaxed">
+              <p className="text-text-primary text-base font-medium leading-relaxed">
                 {result.analysis.improved}
               </p>
-              <Button variant="ghost" size="sm" className="text-accent-custom hover:bg-accent-muted" onClick={() => copyToClipboard(result.analysis!.improved, 'improved')}>
-                {copiedIndex === 'improved' ? t.copied : t.export}
+              <Button variant="ghost" size="sm" className="h-8 text-[10px] font-bold uppercase tracking-widest text-accent-custom hover:bg-accent-muted" onClick={() => copyToClipboard(result.analysis!.improved, 'improved')}>
+                {copiedIndex === 'improved' ? t.copied : t.copy}
               </Button>
             </Card>
           </div>
@@ -192,33 +192,33 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
       )}
 
       {result.tool === 'improver' && result.improvement && (
-        <div className="space-y-8">
-          <Card className="bg-bg-card border-border-custom p-8 border-l-4 border-l-accent-custom space-y-4">
-            <div className="flex items-center gap-2 text-text-primary font-bold text-sm uppercase tracking-widest">
-              <Star className="w-4 h-4 text-accent-custom" />
+        <div className="space-y-6">
+          <Card className="bg-bg-card border-border-custom p-6 border-l-4 border-l-accent-custom space-y-3">
+            <div className="flex items-center gap-2 text-text-primary font-bold text-[10px] uppercase tracking-widest">
+              <Star className="w-3.5 h-3.5 text-accent-custom" />
               {t.improvedVersion}
             </div>
-            <p className="text-text-primary text-2xl font-bold leading-tight">
+            <p className="text-text-primary text-xl font-bold leading-tight">
               {result.improvement.improved}
             </p>
-            <div className="pt-4 border-t border-border-custom">
-              <p className="text-text-secondary text-sm leading-relaxed">
+            <div className="pt-3 border-t border-border-custom">
+              <p className="text-text-secondary text-[11px] leading-relaxed">
                 <strong className="text-text-primary">{t.explanation}:</strong> {result.improvement.explanation}
               </p>
             </div>
           </Card>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
-              <ArrowRight className="w-5 h-5 text-accent-custom" />
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2 uppercase tracking-widest">
+              <ArrowRight className="w-4 h-4 text-accent-custom" />
               {t.variations}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
               {result.improvement.variations.map((v, i) => (
-                <Card key={i} className="bg-bg-card border-border-custom p-5 group relative">
-                  <p className="text-text-primary text-sm pr-12">{v}</p>
-                  <Button variant="ghost" size="icon" className="absolute right-2 top-2 h-8 w-8 opacity-0 group-hover:opacity-100" onClick={() => copyToClipboard(v, `var-${i}`)}>
-                    <Download className="w-4 h-4" />
+                <Card key={i} className="bg-bg-card border-border-custom p-4 group relative">
+                  <p className="text-text-primary text-[11px] pr-10 leading-relaxed">{v}</p>
+                  <Button variant="ghost" size="icon" className="absolute right-1 top-1 h-8 w-8 opacity-0 group-hover:opacity-100" onClick={() => copyToClipboard(v, `var-${i}`)}>
+                    <Download className="w-3.5 h-3.5" />
                   </Button>
                 </Card>
               ))}
@@ -244,30 +244,30 @@ function ResultCard({ text, index, onCopy, isCopied, type }: { text: string; ind
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
     >
-      <Card className="bg-bg-card border-border-custom p-6 hover:border-text-muted transition-all group relative h-full flex flex-col">
+      <Card className="bg-bg-card border-border-custom p-4 hover:border-text-muted transition-all group relative h-full flex flex-col">
         {type === 'hook' && (
-          <span className="text-[9px] font-bold tracking-widest bg-accent-muted text-accent-custom px-2 py-1 rounded w-fit mb-4">
+          <span className="text-[8px] font-black tracking-widest bg-accent-muted text-accent-custom px-2 py-0.5 rounded w-fit mb-3 uppercase">
             {getBadge()}
           </span>
         )}
         
         <div className="flex gap-3 flex-1">
           {type === 'hook' && (
-            <span className="text-accent-custom font-extrabold text-sm mt-0.5 shrink-0">
+            <span className="text-accent-custom font-black text-xs mt-0.5 shrink-0">
               {index.toString().padStart(2, '0')}
             </span>
           )}
           <p className={cn(
-            "text-sm leading-relaxed",
+            "text-[12px] leading-relaxed",
             type === 'caption' ? "text-text-secondary italic" : "text-text-primary",
-            type === 'title' ? "font-semibold" : "font-normal"
+            type === 'title' ? "font-bold" : "font-medium"
           )}>
             {text}
           </p>
         </div>
 
         <button
-          className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest text-text-muted hover:text-text-primary transition-colors opacity-0 group-hover:opacity-100"
+          className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary transition-colors opacity-0 group-hover:opacity-100 bg-bg-deep px-2 py-1 rounded border border-border-custom"
           onClick={onCopy}
         >
           {isCopied ? t.copied : t.copy}

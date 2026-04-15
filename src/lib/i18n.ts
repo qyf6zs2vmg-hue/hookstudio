@@ -88,6 +88,14 @@ export const i18n = {
     chatWelcome: 'Привет! Я ваш ассистент Hook Studio.',
     chatSubtitle: 'Спрашивайте меня о чем угодно по созданию контента!',
     chatPlaceholder: 'Введите сообщение...',
+    inQueue: 'Вы в очереди',
+    queuePosition: 'Позиция в очереди: {pos}',
+    estimatedWait: 'Ожидание: ~{time} сек',
+    userLimitReached: 'Дневной лимит исчерпан (2/2)',
+    globalLimitReached: 'Лимит системы исчерпан (50/50)',
+    tryAgainTomorrow: 'Пожалуйста, приходите завтра',
+    resetCountdown: 'Сброс через: {time}',
+    cooldownActive: 'Подождите {time} сек перед следующим запросом',
   },
   uz: {
     appName: 'Hook Studio AI',
@@ -176,6 +184,14 @@ export const i18n = {
     chatWelcome: 'Salom! Men sizning Hook Studio assistentingizman.',
     chatSubtitle: 'Mendan kontent yaratish bo\'yicha xohlagan narsangizni so\'rang!',
     chatPlaceholder: 'Xabar yozing...',
+    inQueue: 'Siz navbatdasiz',
+    queuePosition: 'Navbatdagi o\'rningiz: {pos}',
+    estimatedWait: 'Kutish vaqti: ~{time} sek',
+    userLimitReached: 'Kunlik limit tugadi (2/2)',
+    globalLimitReached: 'Tizim limiti tugadi (50/50)',
+    tryAgainTomorrow: 'Iltimos, ertaga urinib ko\'ring',
+    resetCountdown: 'Yangilanish: {time}',
+    cooldownActive: 'Keyingi so\'rovgacha {time} sek kuting',
   }
 };
 
