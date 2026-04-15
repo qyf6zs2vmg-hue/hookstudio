@@ -190,9 +190,9 @@ function AppContent() {
         {/* Main Content Area */}
         <main 
           ref={mainRef}
-          className="flex-1 flex flex-col overflow-y-auto no-scrollbar w-full bg-bg-deep"
+          className="flex-1 flex flex-col overflow-y-auto no-scrollbar w-full bg-bg-deep pb-[env(safe-area-inset-bottom,24px)]"
         >
-          <div className="flex-1 flex flex-col p-4 md:p-10 max-w-[1400px] mx-auto w-full">
+          <div className="flex-1 flex flex-col p-4 md:p-10 max-w-[480px] md:max-w-[1400px] mx-auto w-full">
             {/* Desktop Header (Visible only on desktop) */}
             <div className="hidden md:flex items-center justify-between mb-8">
               <div>

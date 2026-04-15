@@ -167,30 +167,30 @@ export function OutputDisplay({ result, onBack, onRegenerate }: OutputDisplayPro
 
       {result.tool === 'generator' && (
         <Tabs defaultValue={result.isABMode ? "ab-hooks" : "hooks"} className="w-full">
-          <TabsList className="flex bg-bg-deep border border-border-custom p-1 h-12 rounded-2xl w-full">
+          <TabsList className="flex flex-wrap bg-bg-deep border border-border-custom p-1 h-auto min-h-12 rounded-2xl w-full gap-1">
             {result.isABMode && (
               <TabsTrigger 
                 value="ab-hooks" 
-                className="flex-1 data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
+                className="flex-1 min-w-[100px] data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all py-2"
               >
                 A/B Hooks
               </TabsTrigger>
             )}
             <TabsTrigger 
               value="hooks" 
-              className="flex-1 data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
+              className="flex-1 min-w-[100px] data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all py-2"
             >
               {t.hooks}
             </TabsTrigger>
             <TabsTrigger 
               value="captions" 
-              className="flex-1 data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
+              className="flex-1 min-w-[100px] data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all py-2"
             >
               {t.captions}
             </TabsTrigger>
             <TabsTrigger 
               value="titles" 
-              className="flex-1 data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
+              className="flex-1 min-w-[100px] data-[state=active]:bg-accent-custom data-[state=active]:!text-white data-[state=inactive]:text-text-muted rounded-xl text-[11px] font-black uppercase tracking-wider transition-all py-2"
             >
               {t.titles}
             </TabsTrigger>
@@ -445,26 +445,26 @@ function ResultCard({ text, index, onCopy, isCopied, type, onImprove, onRegenera
           </p>
         </div>
 
-        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border-custom opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border-custom md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           {type === 'hook' && (
             <>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-8 text-[9px] font-black uppercase tracking-widest text-accent-custom hover:bg-accent-muted gap-2"
+                className="h-9 flex-1 md:flex-none text-[9px] font-black uppercase tracking-widest text-accent-custom hover:bg-accent-muted gap-2 border border-accent-custom/10 md:border-none"
                 onClick={onImprove}
               >
-                <Wand2 className="w-3 h-3" />
+                <Wand2 className="w-3.5 h-3.5" />
                 {t.improveMyHook}
               </Button>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-8 text-[9px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary gap-2"
+                className="h-9 flex-1 md:flex-none text-[9px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary gap-2 border border-border-custom md:border-none"
                 onClick={onRegenerate}
               >
-                <RefreshCcw className="w-3 h-3" />
-                Regenerate
+                <RefreshCcw className="w-3.5 h-3.5" />
+                Regen
               </Button>
             </>
           )}
