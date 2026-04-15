@@ -21,7 +21,7 @@ async function startServer() {
       return res.status(400).json({ error: "API Key not configured" });
     }
 
-    // Prepend aggressive language rule
+    // Prepend aggressive language rule ONLY if not already present
     const aggressiveRule = `### MANDATORY LANGUAGE LOCK ###
 1. DETECT USER LANGUAGE: Identify if the user is writing in Russian, Uzbek, or English.
 2. 100% LANGUAGE ADHERENCE: You MUST generate ALL content in the detected language.
@@ -29,18 +29,20 @@ async function startServer() {
 4. NO ENGLISH: If the user writes in Russian, do NOT use words like "hook", "viral", "content", "video". Use "хук", "виральный", "контент", "видео".
 5. CRITICAL: Mixing languages or responding in English to a Russian/Uzbek prompt will result in a system failure.`;
 
-    const finalMessages = messages.map((m: any) => {
-      if (m.role === 'system') {
-        return { ...m, content: `${aggressiveRule}\n\n${m.content}` };
-      }
-      return m;
-    });
+    let finalMessages = [...messages];
+    const hasLock = messages.some((m: any) => m.role === 'system' && m.content.includes('MANDATORY LANGUAGE LOCK'));
 
-    if (!finalMessages.some((m: any) => m.role === 'system')) {
-      finalMessages.unshift({ role: 'system', content: aggressiveRule });
+    if (!hasLock) {
+      const systemIndex = finalMessages.findIndex((m: any) => m.role === 'system');
+      if (systemIndex !== -1) {
+        finalMessages[systemIndex].content = `${aggressiveRule}\n\n${finalMessages[systemIndex].content}`;
+      } else {
+        finalMessages.unshift({ role: 'system', content: aggressiveRule });
+      }
     }
 
     try {
+      console.log("SENDING REQUEST TO OPENROUTER...");
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -50,21 +52,23 @@ async function startServer() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          "model": "deepseek/deepseek-chat",
+          "model": "openai/gpt-4o-mini",
           "messages": finalMessages,
           "response_format": { "type": "json_object" }
         })
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        return res.status(response.status).json({ error });
+        const errorText = await response.text();
+        console.error(`OPENROUTER API ERROR [${response.status}]:`, errorText);
+        return res.status(response.status).json({ error: errorText });
       }
 
       const data = await response.json();
+      console.log("AI RESPONSE RECEIVED:", JSON.stringify(data, null, 2));
       res.json(data);
     } catch (error) {
-      console.error("Proxy error:", error);
+      console.error("PROXY SERVER ERROR:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   });
