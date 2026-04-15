@@ -14,7 +14,7 @@ async function startServer() {
 
   // API Route for OpenRouter Proxy
   app.post("/api/generate", async (req, res) => {
-    const { prompt } = req.body;
+    const { messages } = req.body;
     const apiKey = process.env.OPENROUTER_API_KEY;
 
     if (!apiKey || apiKey === "MY_OPENROUTER_API_KEY") {
@@ -32,9 +32,7 @@ async function startServer() {
         },
         body: JSON.stringify({
           "model": "deepseek/deepseek-chat",
-          "messages": [
-            { "role": "user", "content": prompt }
-          ],
+          "messages": messages,
           "response_format": { "type": "json_object" }
         })
       });

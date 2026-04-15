@@ -7,6 +7,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { messages } = req.body;
+    
+    // Prepend aggressive language rule to system message if it exists, or add it
+    const aggressiveRule = `STRICT LANGUAGE RULE:
+1. Detect the user's language.
+2. Respond ONLY in that language.
+3. If the user writes in Russian, your response must be 100% Russian.
+4. If the user writes in Uzbek, your response must be 100% Uzbek.
+5. NEVER use English words like "hook", "viral", "content", "video" if the user is not writing in English. Use their equivalents in the user's language.
+6. Mixing languages is strictly forbidden.`;
+
+    const finalMessages = messages.map((m: any) => {
+      if (m.role === 'system') {
+        return { ...m, content: `${aggressiveRule}\n\n${m.content}` };
+      }
+      return m;
+    });
+
+    if (!finalMessages.some((m: any) => m.role === 'system')) {
+      finalMessages.unshift({ role: 'system', content: aggressiveRule });
+    }
+
     const apiKey = process.env.OPENROUTER_API_KEY;
 
     if (!apiKey || apiKey === 'MY_OPENROUTER_API_KEY') {
@@ -25,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       body: JSON.stringify({
         "model": "deepseek/deepseek-chat",
-        "messages": messages
+        "messages": finalMessages
       })
     });
 
