@@ -7,8 +7,10 @@ import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { sendMessage, ChatMessage } from '@/services/chatService';
 import { motion, AnimatePresence } from 'motion/react';
+import { useSettings } from '@/context/SettingsContext';
 
 export function ChatAssistant() {
+  const { t } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -52,8 +54,8 @@ export function ChatAssistant() {
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-text-primary">AI Assistant</h3>
-                    <p className="text-[10px] text-text-secondary uppercase tracking-widest font-bold">Online</p>
+                    <h3 className="text-sm font-bold text-text-primary">{t.aiAssistant}</h3>
+                    <p className="text-[10px] text-text-secondary uppercase tracking-widest font-bold">{t.online}</p>
                   </div>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-text-muted hover:text-text-primary" onClick={() => setIsOpen(false)}>
@@ -66,8 +68,8 @@ export function ChatAssistant() {
                 <div className="space-y-4" ref={scrollRef}>
                   {messages.length === 0 && (
                     <div className="text-center py-8 space-y-2">
-                      <p className="text-text-secondary text-sm">Hello! I'm your Hook Studio assistant.</p>
-                      <p className="text-text-muted text-xs">Ask me anything about content creation!</p>
+                      <p className="text-text-secondary text-sm">{t.chatWelcome}</p>
+                      <p className="text-text-muted text-xs">{t.chatSubtitle}</p>
                     </div>
                   )}
                   {messages.map((msg, i) => (
@@ -110,7 +112,7 @@ export function ChatAssistant() {
                   className="flex gap-2"
                 >
                   <Input
-                    placeholder="Type a message..."
+                    placeholder={t.chatPlaceholder}
                     className="bg-bg-deep border-border-custom text-text-primary focus:ring-accent-custom/20"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}

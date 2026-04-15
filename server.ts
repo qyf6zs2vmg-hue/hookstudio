@@ -21,6 +21,25 @@ async function startServer() {
       return res.status(400).json({ error: "API Key not configured" });
     }
 
+    // Prepend aggressive language rule
+    const aggressiveRule = `### MANDATORY LANGUAGE LOCK ###
+1. DETECT USER LANGUAGE: Identify if the user is writing in Russian, Uzbek, or English.
+2. 100% LANGUAGE ADHERENCE: You MUST generate ALL content in the detected language.
+3. JSON VALUES: Every string inside the JSON response MUST be in the user's language.
+4. NO ENGLISH: If the user writes in Russian, do NOT use words like "hook", "viral", "content", "video". Use "хук", "виральный", "контент", "видео".
+5. CRITICAL: Mixing languages or responding in English to a Russian/Uzbek prompt will result in a system failure.`;
+
+    const finalMessages = messages.map((m: any) => {
+      if (m.role === 'system') {
+        return { ...m, content: `${aggressiveRule}\n\n${m.content}` };
+      }
+      return m;
+    });
+
+    if (!finalMessages.some((m: any) => m.role === 'system')) {
+      finalMessages.unshift({ role: 'system', content: aggressiveRule });
+    }
+
     try {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -32,7 +51,7 @@ async function startServer() {
         },
         body: JSON.stringify({
           "model": "deepseek/deepseek-chat",
-          "messages": messages,
+          "messages": finalMessages,
           "response_format": { "type": "json_object" }
         })
       });

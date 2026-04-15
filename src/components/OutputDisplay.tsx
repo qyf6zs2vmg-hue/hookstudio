@@ -21,21 +21,21 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(id);
-    toast.success('Copied to clipboard!');
+    toast.success(t.copied);
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
   const downloadResults = () => {
-    let content = `IDEA: ${result.idea}\nMODE: ${result.mode}\nTOOL: ${result.tool}\n\n`;
+    let content = `${t.ideaLabel}: ${result.idea}\n${t.modeLabel}: ${result.mode}\n${t.toolLabel}: ${result.tool}\n\n`;
     
     if (result.tool === 'generator') {
-      content += `HOOKS:\n${result.hooks.map((h, i) => `${i + 1}. ${h}`).join('\n')}\n\n`;
-      content += `CAPTIONS:\n${result.captions.map((c, i) => `${i + 1}. ${c}`).join('\n')}\n\n`;
-      content += `TITLES:\n${result.titles.map((t, i) => `${i + 1}. ${t}`).join('\n')}`;
+      content += `${t.hooks.toUpperCase()}:\n${result.hooks.map((h, i) => `${i + 1}. ${h}`).join('\n')}\n\n`;
+      content += `${t.captions.toUpperCase()}:\n${result.captions.map((c, i) => `${i + 1}. ${c}`).join('\n')}\n\n`;
+      content += `${t.titles.toUpperCase()}:\n${result.titles.map((t, i) => `${i + 1}. ${t}`).join('\n')}`;
     } else if (result.tool === 'analyzer' && result.analysis) {
-      content += `SCORE: ${result.analysis.score}/10\nPOTENTIAL: ${result.analysis.potential}\n\nPROBLEMS:\n${result.analysis.problems.join('\n')}\n\nIMPROVED: ${result.analysis.improved}`;
+      content += `${t.score.toUpperCase()}: ${result.analysis.score}/10\n${t.potential.toUpperCase()}: ${result.analysis.potential}\n\n${t.problems.toUpperCase()}:\n${result.analysis.problems.join('\n')}\n\n${t.improvedVersion.toUpperCase()}: ${result.analysis.improved}`;
     } else if (result.tool === 'improver' && result.improvement) {
-      content += `IMPROVED: ${result.improvement.improved}\n\nVARIATIONS:\n${result.improvement.variations.join('\n')}\n\nEXPLANATION: ${result.improvement.explanation}`;
+      content += `${t.improvedVersion.toUpperCase()}: ${result.improvement.improved}\n\n${t.variations.toUpperCase()}:\n${result.improvement.variations.join('\n')}\n\n${t.explanation.toUpperCase()}: ${result.improvement.explanation}`;
     }
 
     const blob = new Blob([content], { type: 'text/plain' });
@@ -75,7 +75,7 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
             <Download className="w-4 h-4 mr-2" />
             {t.export}
           </Button>
-          <Button variant="outline" size="sm" className="bg-bg-surface border-border-custom text-text-secondary hover:text-text-primary" onClick={() => toast.info('Sharing coming soon!')}>
+          <Button variant="outline" size="sm" className="bg-bg-surface border-border-custom text-text-secondary hover:text-text-primary" onClick={() => toast.info(t.sharingSoon)}>
             <Share2 className="w-4 h-4 mr-2" />
             {t.share}
           </Button>
@@ -184,7 +184,7 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
                 {result.analysis.improved}
               </p>
               <Button variant="ghost" size="sm" className="text-accent-custom hover:bg-accent-muted" onClick={() => copyToClipboard(result.analysis!.improved, 'improved')}>
-                {copiedIndex === 'improved' ? 'Copied' : t.export}
+                {copiedIndex === 'improved' ? t.copied : t.export}
               </Button>
             </Card>
           </div>
@@ -231,9 +231,10 @@ export function OutputDisplay({ result, onBack }: OutputDisplayProps) {
 }
 
 function ResultCard({ text, index, onCopy, isCopied, type }: { text: string; index: number; onCopy: () => void; isCopied: boolean; type: 'hook' | 'caption' | 'title'; key?: string }) {
+  const { t } = useSettings();
   const getBadge = () => {
     if (type !== 'hook') return null;
-    const badges = ['CURIOSITY', 'URGENCY', 'AUTHORITY', 'PATTERN INTERRUPT', 'SOCIAL PROOF'];
+    const badges = [t.badgeCuriosity, t.badgeUrgency, t.badgeAuthority, t.badgePatternInterrupt, t.badgeSocialProof];
     return badges[index % badges.length];
   };
 
@@ -269,7 +270,7 @@ function ResultCard({ text, index, onCopy, isCopied, type }: { text: string; ind
           className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest text-text-muted hover:text-text-primary transition-colors opacity-0 group-hover:opacity-100"
           onClick={onCopy}
         >
-          {isCopied ? 'Copied' : 'Copy'}
+          {isCopied ? t.copied : t.copy}
         </button>
       </Card>
     </motion.div>

@@ -34,7 +34,7 @@ function AppContent() {
       saveToHistory(result);
       toast.success(t.statusReady);
     } catch (error) {
-      toast.error('Something went wrong. Using fallback templates.');
+      toast.error(t.errorFallback);
     } finally {
       setIsGenerating(false);
     }
@@ -103,7 +103,7 @@ function AppContent() {
               <span className="w-2 h-2 rounded-full bg-accent-custom animate-pulse" />
               {t.statusReady}
             </div>
-            <Button variant="ghost" size="sm" className="text-accent-custom hover:bg-accent-muted font-bold uppercase tracking-widest text-[10px]" onClick={() => toast.info('Pro features coming soon!')}>
+            <Button variant="ghost" size="sm" className="text-accent-custom hover:bg-accent-muted font-bold uppercase tracking-widest text-[10px]" onClick={() => toast.info(t.proComingSoon)}>
               {t.upgrade}
             </Button>
           </div>

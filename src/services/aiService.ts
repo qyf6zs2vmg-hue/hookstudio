@@ -36,13 +36,12 @@ export async function generateContent(
   tone: ContentTone, 
   tool: ToolType
 ): Promise<GenerationResult> {
-  const systemPrompt = `STRICT LANGUAGE RULE:
-1. Detect the user's language.
-2. Respond ONLY in that language.
-3. If the user writes in Russian, your response must be 100% Russian.
-4. If the user writes in Uzbek, your response must be 100% Uzbek.
-5. NEVER use English words like "hook", "viral", "content", "video" if the user is not writing in English. Use their equivalents in the user's language.
-6. Mixing languages is strictly forbidden.
+  const systemPrompt = `### MANDATORY LANGUAGE LOCK ###
+1. DETECT USER LANGUAGE: Identify if the user is writing in Russian, Uzbek, or English.
+2. 100% LANGUAGE ADHERENCE: You MUST generate ALL content in the detected language.
+3. JSON VALUES: Every string inside the JSON response (hooks, captions, titles, analysis, improvements) MUST be in the user's language.
+4. NO ENGLISH: If the user writes in Russian, do NOT use words like "hook", "viral", "content", "video". Use "хук", "виральный", "контент", "видео".
+5. CRITICAL: Mixing languages or responding in English to a Russian/Uzbek prompt will result in a system failure.
 
 You are a viral content expert for ${pack} content. 
 Tone: ${tone}. Viral Mode: ${mode}.`;
@@ -50,16 +49,20 @@ Tone: ${tone}. Viral Mode: ${mode}.`;
   let userPrompt = "";
 
   if (tool === 'generator') {
-    userPrompt = `Generate viral content for this idea: "${input}".
-Return exactly in this JSON format:
+    userPrompt = `USER IDEA: "${input}"
+TASK: Generate viral content for the USER IDEA above.
+LANGUAGE: Use the SAME language as the USER IDEA.
+FORMAT: Return exactly in this JSON format:
 {
   "hooks": ["hook 1", ..., "hook 10"],
   "captions": ["caption 1", ..., "caption 5"],
   "titles": ["title 1", ..., "title 5"]
 }`;
   } else if (tool === 'improver') {
-    userPrompt = `Improve this weak hook: "${input}".
-Return exactly in this JSON format:
+    userPrompt = `USER HOOK: "${input}"
+TASK: Improve the USER HOOK above.
+LANGUAGE: Use the SAME language as the USER HOOK.
+FORMAT: Return exactly in this JSON format:
 {
   "improvement": {
     "improved": "the best improved version",
@@ -69,8 +72,10 @@ Return exactly in this JSON format:
   "hooks": [], "captions": [], "titles": []
 }`;
   } else if (tool === 'analyzer') {
-    userPrompt = `Analyze this hook: "${input}".
-Return exactly in this JSON format:
+    userPrompt = `USER HOOK: "${input}"
+TASK: Analyze the USER HOOK above.
+LANGUAGE: Use the SAME language as the USER HOOK.
+FORMAT: Return exactly in this JSON format:
 {
   "analysis": {
     "score": 8,

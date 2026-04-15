@@ -46,7 +46,7 @@ export function Sidebar({ history, activeId, onSelect, onDelete, onNew, onOpenSe
           <div className="space-y-1 pb-6 px-4">
             {history.length === 0 ? (
               <div className="px-4 py-12 text-center">
-                <p className="text-text-muted text-xs font-bold uppercase tracking-widest opacity-50">No history yet</p>
+                <p className="text-text-muted text-xs font-bold uppercase tracking-widest opacity-50">{t.noHistory}</p>
               </div>
             ) : (
               history.map((item) => (
