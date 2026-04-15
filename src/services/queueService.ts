@@ -50,51 +50,77 @@ function getTodayKey() {
 }
 
 function getCache(): Record<string, GenerationResult> {
-  const cached = localStorage.getItem(CACHE_KEY);
-  return cached ? JSON.parse(cached) : {};
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    return cached ? JSON.parse(cached) : {};
+  } catch (e) {
+    console.error("Cache read error:", e);
+    return {};
+  }
 }
 
 function setCache(key: string, result: GenerationResult) {
-  const cache = getCache();
-  cache[key] = result;
-  localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  try {
+    const cache = getCache();
+    cache[key] = result;
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  } catch (e) {
+    console.error("Cache write error:", e);
+  }
 }
 
 function getRequestKey(input: string, mode: ViralMode, pack: ContentPack, tone: ContentTone, tool: ToolType) {
-  return btoa(JSON.stringify({ input, mode, pack, tone, tool }));
+  // Use a simple string key instead of btoa to avoid Unicode issues with Russian/Uzbek characters
+  return `key_${input}_${mode}_${pack}_${tone}_${tool}`;
 }
 
 function getUserLimits() {
-  const limits = localStorage.getItem(LIMITS_KEY);
-  const today = getTodayKey();
-  const parsed = limits ? JSON.parse(limits) : { date: today, count: 0, lastRequest: 0 };
-  
-  if (parsed.date !== today) {
-    return { date: today, count: 0, lastRequest: parsed.lastRequest };
+  try {
+    const limits = localStorage.getItem(LIMITS_KEY);
+    const today = getTodayKey();
+    const parsed = limits ? JSON.parse(limits) : { date: today, count: 0, lastRequest: 0 };
+    
+    if (parsed.date !== today) {
+      return { date: today, count: 0, lastRequest: parsed.lastRequest };
+    }
+    return parsed;
+  } catch (e) {
+    return { date: getTodayKey(), count: 0, lastRequest: 0 };
   }
-  return parsed;
 }
 
 function setUserLimits(count: number, lastRequest: number) {
-  const today = getTodayKey();
-  localStorage.setItem(LIMITS_KEY, JSON.stringify({ date: today, count, lastRequest }));
+  try {
+    const today = getTodayKey();
+    localStorage.setItem(LIMITS_KEY, JSON.stringify({ date: today, count, lastRequest }));
+  } catch (e) {
+    console.error("Limits write error:", e);
+  }
 }
 
 // Global limits simulation (using localStorage for demo purposes)
 function getGlobalLimits() {
-  const limits = localStorage.getItem(GLOBAL_LIMITS_KEY);
-  const today = getTodayKey();
-  const parsed = limits ? JSON.parse(limits) : { date: today, count: 0 };
-  
-  if (parsed.date !== today) {
-    return { date: today, count: 0 };
+  try {
+    const limits = localStorage.getItem(GLOBAL_LIMITS_KEY);
+    const today = getTodayKey();
+    const parsed = limits ? JSON.parse(limits) : { date: today, count: 0 };
+    
+    if (parsed.date !== today) {
+      return { date: today, count: 0 };
+    }
+    return parsed;
+  } catch (e) {
+    return { date: getTodayKey(), count: 0 };
   }
-  return parsed;
 }
 
 function setGlobalLimits(count: number) {
-  const today = getTodayKey();
-  localStorage.setItem(GLOBAL_LIMITS_KEY, JSON.stringify({ date: today, count }));
+  try {
+    const today = getTodayKey();
+    localStorage.setItem(GLOBAL_LIMITS_KEY, JSON.stringify({ date: today, count }));
+  } catch (e) {
+    console.error("Global limits write error:", e);
+  }
 }
 
 function getResetTimeRemaining() {
