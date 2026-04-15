@@ -27,11 +27,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       finalMessages.unshift({ role: 'system', content: aggressiveRule });
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    console.log("ENV API KEY:", process.env.API_KEY ? "EXISTS" : "MISSING");
+    const apiKey = process.env.API_KEY;
 
     if (!apiKey || apiKey === 'MY_OPENROUTER_API_KEY') {
       return res.status(400).json({ 
-        error: 'OpenRouter API Key not configured in Vercel environment variables' 
+        error: 'API key not found' 
       });
     }
 
@@ -44,7 +45,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "deepseek/deepseek-chat",
+        "model": "openai/gpt-4o-mini",
         "messages": finalMessages
       })
     });

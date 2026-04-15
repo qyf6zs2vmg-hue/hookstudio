@@ -7,12 +7,13 @@ export const handler: Handler = async (event) => {
 
   try {
     const { prompt } = JSON.parse(event.body || "{}");
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    console.log("ENV API KEY:", process.env.API_KEY ? "EXISTS" : "MISSING");
+    const apiKey = process.env.API_KEY;
 
     if (!apiKey || apiKey === "MY_OPENROUTER_API_KEY") {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "OpenRouter API Key not configured in Netlify environment variables" }),
+        body: JSON.stringify({ error: "API key not found" }),
       };
     }
 
@@ -25,7 +26,7 @@ export const handler: Handler = async (event) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "deepseek/deepseek-chat",
+        "model": "openai/gpt-4o-mini",
         "messages": [
           { "role": "user", "content": prompt }
         ],

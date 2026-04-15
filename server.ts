@@ -15,10 +15,12 @@ async function startServer() {
   // API Route for OpenRouter Proxy
   app.post("/api/generate", async (req, res) => {
     const { messages } = req.body;
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    
+    console.log("ENV API KEY:", process.env.API_KEY ? "EXISTS" : "MISSING");
+    const apiKey = process.env.API_KEY;
 
     if (!apiKey || apiKey === "MY_OPENROUTER_API_KEY") {
-      return res.status(400).json({ error: "API Key not configured" });
+      return res.status(400).json({ error: "API key not found" });
     }
 
     // Prepend aggressive language rule ONLY if not already present
@@ -76,10 +78,10 @@ async function startServer() {
   // API Route for Chat Assistant
   app.post("/api/chat", async (req, res) => {
     const { messages } = req.body;
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const apiKey = process.env.API_KEY;
 
     if (!apiKey || apiKey === "MY_OPENROUTER_API_KEY") {
-      return res.status(400).json({ error: "API Key not configured" });
+      return res.status(400).json({ error: "API key not found" });
     }
 
     try {
@@ -92,7 +94,7 @@ async function startServer() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          "model": "deepseek/deepseek-chat",
+          "model": "openai/gpt-4o-mini",
           "messages": messages
         })
       });
